@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.UUID
 
-val CTF_SERVICE_UUID: UUID = UUID.fromString("8c380000-10bd-4fdb-ba21-1922d6cf860d")
+val CTF_SERVICE_UUID: UUID = UUID.fromString("E20A39F4-73F5-4BC4-A12F-17D1AD07A961")
 val PASSWORD_CHARACTERISTIC_UUID: UUID = UUID.fromString("8c380001-10bd-4fdb-ba21-1922d6cf860d")
-val NAME_CHARACTERISTIC_UUID: UUID = UUID.fromString("8c380002-10bd-4fdb-ba21-1922d6cf860d")
+val NAME_CHARACTERISTIC_UUID: UUID = UUID.fromString("08590F7E-DB05-467E-8757-72F6FAEB13D4")
 
 @Suppress("DEPRECATION")
 class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") constructor(
