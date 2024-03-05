@@ -4,8 +4,11 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.os.ParcelUuid
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -50,7 +53,15 @@ class BLEScanner(context: Context) {
 
     @RequiresPermission(PERMISSION_BLUETOOTH_SCAN)
     fun startScanning() {
-        scanner.startScan(scanCallback)
+        val scanSettings =
+            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+                .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
+                .setReportDelay(0L)
+                .build()
+        val scanFilter = ScanFilter.Builder().setServiceUuid(ParcelUuid(CTF_SERVICE_UUID)).build()
+        scanner.startScan(listOf(scanFilter), scanSettings, scanCallback)
         isScanning.value = true
     }
 

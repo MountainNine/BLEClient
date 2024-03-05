@@ -33,14 +33,17 @@ fun DeviceScreen(
     Column(
         Modifier.scrollable(rememberScrollState(), Orientation.Vertical)
     ) {
-        Button(onClick = connect) {
-            Text("1. Connect")
-        }
-        Text("Device connected: $isDeviceConnected")
-        Button(onClick = discoverServices, enabled = isDeviceConnected) {
-            Text("2. Discover Services")
-        }
+
         LazyColumn {
+            item {
+                Button(onClick = connect) {
+                    Text("1. Connect")
+                }
+                Text("Device connected: $isDeviceConnected")
+                Button(onClick = discoverServices, enabled = isDeviceConnected) {
+                    Text("2. Discover Services")
+                }
+            }
             items(discoveredCharacteristics.keys.sorted()) { serviceUuid ->
                 Text(text = serviceUuid, fontWeight = FontWeight.Black)
                 Column(modifier = Modifier.padding(start = 10.dp)) {
@@ -49,22 +52,24 @@ fun DeviceScreen(
                     }
                 }
             }
-        }
-        Button(onClick = readPassword, enabled = isDeviceConnected && foundTargetService) {
-            Text("3. Read Password")
-        }
-        if (password != null) {
-            Text("Found password: $password")
-        }
-        Button(onClick = writeName, enabled = isDeviceConnected && foundTargetService) {
-            Text("4. Write Your Name")
-        }
-        if (nameWrittenTimes > 0) {
-            Text("Successful writes: $nameWrittenTimes")
-        }
+            item {
+                Button(onClick = readPassword, enabled = isDeviceConnected && foundTargetService) {
+                    Text("3. Read Password")
+                }
+                if (password != null) {
+                    Text("Found password: $password")
+                }
+                Button(onClick = writeName, enabled = isDeviceConnected && foundTargetService) {
+                    Text("4. Write Your Name")
+                }
+                if (nameWrittenTimes > 0) {
+                    Text("Successful writes: $nameWrittenTimes")
+                }
 
-        OutlinedButton(modifier = Modifier.padding(top = 40.dp),  onClick = unselectDevice) {
-            Text("Disconnect")
+                OutlinedButton(modifier = Modifier.padding(top = 40.dp),  onClick = unselectDevice) {
+                    Text("Disconnect")
+                }
+            }
         }
     }
 }
