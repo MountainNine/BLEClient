@@ -107,7 +107,9 @@ class BLEClientViewModel(private val application: Application): AndroidViewModel
 
     @RequiresPermission(PERMISSION_BLUETOOTH_CONNECT)
     fun writeNameToActiveDevice() {
-        activeConnection.value?.writeName()
+        viewModelScope.launch {
+            activeConnection.value?.writeName(0)
+        }
     }
 
     override fun onCleared() {
