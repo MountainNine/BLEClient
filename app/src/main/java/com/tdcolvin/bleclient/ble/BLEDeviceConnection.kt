@@ -17,8 +17,8 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 val CTF_SERVICE_UUID: UUID = UUID.fromString("E20A39F4-73F5-4BC4-A12F-17D1AD07A961")
-val PASSWORD_CHARACTERISTIC_UUID: UUID = UUID.fromString("8c380001-10bd-4fdb-ba21-1922d6cf860d")
-val NAME_CHARACTERISTIC_UUID: UUID = UUID.fromString("08590F7E-DB05-467E-8757-72F6FAEB13D4")
+val READ_CHARACTERISTIC_UUID: UUID = UUID.fromString("8c380001-10bd-4fdb-ba21-1922d6cf860d")
+val WRITE_CHARACTERISTIC_UUID: UUID = UUID.fromString("08590F7E-DB05-467E-8757-72F6FAEB13D4")
 
 @Suppress("DEPRECATION")
 class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") constructor(
@@ -114,6 +114,11 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
             services.value = gatt.services
+            try {
+                gatt.requestMtu(512)
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+            }
         }
 
         @Deprecated("Deprecated in Java")
@@ -123,7 +128,8 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
             status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
-            if (characteristic.uuid == PASSWORD_CHARACTERISTIC_UUID) {
+            if (characteristic.uuid == READ_CHARACTERISTIC_UUID) {
+                Log.d("BLEClient", String(characteristic.value))
                 passwordRead.value = String(characteristic.value)
             }
         }
@@ -135,7 +141,7 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
             status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
-            if (characteristic.uuid == NAME_CHARACTERISTIC_UUID) {
+            if (characteristic.uuid == WRITE_CHARACTERISTIC_UUID) {
                 successfulNameWrites.update { it + 1 }
                 if(index < textList.size - 1) {
                     index++
@@ -167,7 +173,7 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
     @RequiresPermission(PERMISSION_BLUETOOTH_CONNECT)
     fun readPassword() {
         val service = gatt?.getService(CTF_SERVICE_UUID)
-        val characteristic = service?.getCharacteristic(PASSWORD_CHARACTERISTIC_UUID)
+        val characteristic = service?.getCharacteristic(READ_CHARACTERISTIC_UUID)
         if (characteristic != null) {
             val success = gatt?.readCharacteristic(characteristic)
             Log.v("bluetooth", "Read status: $success")
@@ -177,7 +183,7 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
     @RequiresPermission(PERMISSION_BLUETOOTH_CONNECT)
     fun writeName(index: Int) = CoroutineScope(Dispatchers.Default).launch {
         val service = gatt?.getService(CTF_SERVICE_UUID)
-        val characteristic = service?.getCharacteristic(NAME_CHARACTERISTIC_UUID)
+        val characteristic = service?.getCharacteristic(WRITE_CHARACTERISTIC_UUID)
         if (characteristic != null) {
             Log.v("bluetooth", "Write Start")
             val text = textList[index]
@@ -186,7 +192,7 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
                 gatt?.writeCharacteristic(
                     characteristic,
                     text.toByteArray(),
-                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
                 )
             } else {
                 gatt?.writeCharacteristic(characteristic)
